@@ -1,7 +1,13 @@
 @import 'tailwindcss';
 
+@theme {
+	--color-primary: #5c0017;
+	--gradient-primary: linear-gradient(90deg, #5c0017 0%, #3d000f 100%);
+}
+
 body {
  	font-family: 'Inter Variable', sans-serif;
+	background: var(--gradient-primary);
 }
 
 .font-head {
