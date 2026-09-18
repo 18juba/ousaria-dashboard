@@ -1,1 +1,17 @@
 @import 'tailwindcss';
+
+body {
+ 	font-family: 'Inter Variable', sans-serif;
+}
+
+.font-head {
+ 	font-family: 'Alumni Sans Variable', sans-serif;
+}
+
+.font-text {
+ 	font-family: 'Inter Variable', sans-serif;
+}
+
+.font-mono {
+    font-family: 'JetBrains Mono Variable', monospace;
+}
