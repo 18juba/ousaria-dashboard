@@ -16,7 +16,7 @@
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
-<main class="flex h-screen min-h-screen gap-8 p-6">
+<main class="flex h-screen min-h-0 gap-8 overflow-hidden p-6">
 	<nav class="flex w-50 flex-col justify-between py-8 2xl:w-60">
 		<ul class="flex flex-col gap-4 font-bold text-white 2xl:text-lg">
 			<li class="rounded-lg bg-linear-to-r from-white/20 to-white/5 p-2">
@@ -33,11 +33,15 @@
 		<img src="/img/logo-slogan.webp" alt="Logomarca Ousaria" class="w-44 object-contain 2xl:w-50" />
 	</nav>
 
-	<div class="h-full w-full rounded-2xl bg-mist-100 p-6">
+	<div
+		class="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden rounded-2xl bg-mist-100 p-6"
+	>
 		<div class="mb-4 flex items-center justify-between rounded-lg bg-primary px-6 py-2 font-bold">
 			<p>Comunidade Voo</p>
 			<p class="text-lg tracking-wide">ousar<span class="text-secondary">!</span>a</p>
 		</div>
-		{@render children()}
+		<div class="min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
+			{@render children()}
+		</div>
 	</div>
 </main>

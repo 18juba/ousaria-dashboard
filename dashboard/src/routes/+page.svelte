@@ -3,7 +3,14 @@
 	import LineChart from '$lib/components/charts/LineChart.svelte';
 	import TrendingDown from '@lucide/svelte/icons/trending-down';
 	import TrendingUp from '@lucide/svelte/icons/trending-up';
-	import { dashboardKpis, healthTrendData, impactData, retentionData } from '$lib/data/voo';
+	import {
+		dashboardKpis,
+		growthData,
+		healthTrendData,
+		impactData,
+		retentionData,
+		whatsappThemes
+	} from '$lib/data/voo';
 
 	const formatDelta = (kpi) => {
 		const signal = kpi.delta > 0 ? '+' : kpi.delta < 0 ? '−' : '';
@@ -44,10 +51,16 @@
 		{/each}
 	</section>
 
-	<section class="grid grid-cols-1 gap-4 lg:grid-cols-5 2xl:grid-cols-7">
-		<article
-			class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm lg:col-span-2 2xl:col-span-2"
-		>
+	<section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		<article class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm">
+			<div class="mb-2">
+				<h2 class="text-base font-bold text-primary">Crescimento da base</h2>
+				<p class="text-xs text-primary/60">Membros ativos e novos membros</p>
+			</div>
+			<LineChart data={growthData} title="Crescimento mensal da base" unit="" />
+		</article>
+
+		<article class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm">
 			<div class="mb-2">
 				<h2 class="text-base font-bold text-primary">Participação e engajamento</h2>
 				<p class="text-xs text-primary/60">Percentual de membros ao longo do período</p>
@@ -59,24 +72,47 @@
 			/>
 		</article>
 
-		<article
-			class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm lg:col-span-3 2xl:col-span-3"
-		>
-			<div class="mb-2">
-				<h2 class="text-base font-bold text-primary">Indicadores de impacto</h2>
-				<p class="text-xs text-primary/60">Último resultado disponível</p>
-			</div>
-			<BarChart data={impactData} title="Indicadores de impacto" unit="%" />
-		</article>
-
-		<article
-			class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm lg:col-span-2 2xl:col-span-2"
-		>
+		<article class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm">
 			<div class="mb-2">
 				<h2 class="text-base font-bold text-primary">Retenção e churn</h2>
 				<p class="text-xs text-primary/60">Abril sem dado disponível</p>
 			</div>
 			<LineChart data={retentionData} title="Evolução mensal de retenção e churn" unit="%" />
+		</article>
+	</section>
+
+	<section class="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-7">
+		<article
+			class="h-full rounded-xl border border-primary/10 bg-white p-5 shadow-sm lg:col-span-3"
+		>
+			<div class="mb-2">
+				<h2 class="text-lg font-bold text-primary">Indicadores de impacto</h2>
+				<p class="text-xs text-primary/60">Comparação entre ondas</p>
+			</div>
+			<BarChart data={impactData} title="Indicadores de impacto" unit="%" />
+		</article>
+
+		<article
+			class="flex h-full flex-col rounded-xl border border-primary/10 bg-white p-5 shadow-sm lg:col-span-4"
+		>
+			<h2 class="mb-3 text-lg font-bold text-primary">Temas recorrentes no WhatsApp</h2>
+
+			<div class="min-h-0 flex-1 overflow-y-auto rounded-lg border border-primary/10">
+				<table class="w-full border-collapse text-left text-xs">
+					<tbody>
+						{#each whatsappThemes as item (item.month)}
+							<tr class="border-t border-primary/10 align-top">
+								<td
+									class="px-3 py-3 font-mono text-[11px] font-semibold whitespace-nowrap text-primary"
+								>
+									{item.month}
+								</td>
+								<td class="px-3 py-3 leading-5 text-primary/75">{item.theme}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
 		</article>
 	</section>
 </div>

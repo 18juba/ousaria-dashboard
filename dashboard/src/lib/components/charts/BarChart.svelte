@@ -8,19 +8,35 @@
 		responsive: true,
 		maintainAspectRatio: false,
 		plugins: {
-			legend: { display: false },
+			legend: {
+				display: true,
+				position: 'bottom',
+				labels: {
+					color: '#5c0017',
+					usePointStyle: true,
+					boxWidth: 8,
+					padding: 8,
+					font: { family: 'Inter Variable', size: 10 }
+				}
+			},
 			tooltip: {
 				backgroundColor: '#5c0017',
 				padding: 12,
 				callbacks: {
-					label: (context) => ` Resultado: ${context.parsed.y}${unit}`
+					label: (context) => ` ${context.dataset.label}: ${context.parsed.y}${unit}`
 				}
 			}
 		},
 		scales: {
 			x: {
 				grid: { display: false },
-				ticks: { color: '#8f6b73', font: { family: 'Inter Variable', size: 10 } }
+				ticks: {
+					color: '#8f6b73',
+					autoSkip: false,
+					maxRotation: 0,
+					minRotation: 0,
+					font: { family: 'Inter Variable', size: 9 }
+				}
 			},
 			y: {
 				beginAtZero: true,
@@ -36,6 +52,6 @@
 	});
 </script>
 
-<div class="relative h-44 w-full" role="img" aria-label={title}>
+<div class="relative h-64 w-full" role="img" aria-label={title}>
 	<Bar {data} {options} />
 </div>

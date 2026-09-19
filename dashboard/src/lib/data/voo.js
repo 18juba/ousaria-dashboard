@@ -150,6 +150,38 @@ export const healthTrendData = {
 	]
 };
 
+export const growthData = {
+	labels: monthlyMetrics.map((metric) => metric.shortMonth),
+	datasets: [
+		{
+			label: 'Membros ativos',
+			data: monthlyMetrics.map((metric) => metric.activeMembers),
+			borderColor: colors.primary,
+			backgroundColor: 'rgba(92, 0, 23, 0.08)',
+			pointBackgroundColor: colors.primary,
+			pointBorderColor: '#fffaf5',
+			pointBorderWidth: 2,
+			pointRadius: 3,
+			pointHoverRadius: 5,
+			borderWidth: 2.5,
+			tension: 0.35
+		},
+		{
+			label: 'Novos membros',
+			data: monthlyMetrics.map((metric) => metric.newMembers),
+			borderColor: colors.secondary,
+			backgroundColor: 'rgba(252, 178, 60, 0.12)',
+			pointBackgroundColor: colors.secondary,
+			pointBorderColor: '#fffaf5',
+			pointBorderWidth: 2,
+			pointRadius: 3,
+			pointHoverRadius: 5,
+			borderWidth: 2.5,
+			tension: 0.35
+		}
+	]
+};
+
 export const retentionData = {
 	labels: monthlyMetrics.map((metric) => metric.shortMonth),
 	datasets: [
@@ -185,15 +217,66 @@ export const retentionData = {
 };
 
 export const impactData = {
-	labels: ['Aprendizado aplicado', 'Receita', 'Conexões de negócio', 'Resposta de impacto'],
+	// NPS e autonomia ficam fora deste gráfico porque usam escalas diferentes.
+	labels: [
+		['Aprendizado', 'aplicado'],
+		['Aumento de', 'faturamento'],
+		['Conexão de', 'negócio'],
+		['Resposta à', 'pesquisa']
+	],
 	datasets: [
 		{
-			label: 'Resultado',
-			data: [58, 39, 29, 52],
-			backgroundColor: [colors.secondary, colors.primary, colors.tertiary, colors.muted],
+			label: 'Onda 1 — Abril/26',
+			data: [81, 47, 63, 89],
+			backgroundColor: colors.secondary,
+			borderColor: colors.secondary,
+			borderWidth: 1,
+			barPercentage: 0.65,
+			categoryPercentage: 0.78,
 			borderRadius: 8,
 			borderSkipped: false,
-			barThickness: 22
+			maxBarThickness: 18
+		},
+		{
+			label: 'Onda 2 — Setembro/26',
+			data: [58, 39, 29, 52],
+			backgroundColor: colors.primary,
+			borderColor: colors.primary,
+			borderWidth: 1,
+			barPercentage: 0.65,
+			categoryPercentage: 0.78,
+			borderRadius: 8,
+			borderSkipped: false,
+			maxBarThickness: 18
 		}
 	]
 };
+
+// Transcrição exata da tabela 3.5 do PDF do desafio.
+export const whatsappThemes = [
+	{
+		month: 'Abril/26',
+		theme: 'Dúvidas sobre como usar o grupo e o cronograma de encontros'
+	},
+	{
+		month: 'Maio/26',
+		theme: 'Dúvidas técnicas de precificação e fluxo de caixa'
+	},
+	{
+		month: 'Junho/26',
+		theme: 'Pedidos de indicação de fornecedores e parceiros'
+	},
+	{
+		month: 'Julho/26',
+		theme: 'Reclamações sobre o horário fixo dos encontros (sempre 3ª feira, 19h)'
+	},
+	{
+		month: 'Agosto/26',
+		theme: 'Comentários de que "os encontros estão repetitivos"'
+	},
+	{
+		month: 'Setembro/26',
+		theme:
+			'Poucas mensagens espontâneas; maior parte das interações são respostas a lembretes automáticos'
+	}
+];
