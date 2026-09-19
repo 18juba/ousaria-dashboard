@@ -1,4 +1,5 @@
 <script>
+	import { resolve } from '$app/paths';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 
@@ -19,22 +20,17 @@
 	<nav class="flex w-50 flex-col justify-between py-8 2xl:w-60">
 		<ul class="flex flex-col gap-4 font-bold text-white 2xl:text-lg">
 			<li class="rounded-lg bg-linear-to-r from-white/20 to-white/5 p-2">
-				<a class="flex items-center gap-4" href=""><ChartNoAxesCombined /> Dashboard</a>
+				<a class="flex items-center gap-4" href={resolve('/')}><ChartNoAxesCombined /> Dashboard</a>
 			</li>
 			<li class="rounded-lg p-2">
-				<a class="flex items-center gap-4" href="/relatorio"><FileText /> Relatório</a>
+				<a class="flex items-center gap-4" href={resolve('/relatorio')}><FileText /> Relatório</a>
 			</li>
 			<li class="rounded-lg p-2">
-				<a class="flex items-center gap-4" href="/automacao"><Settings /> Automação</a>
+				<a class="flex items-center gap-4" href={resolve('/automacao')}><Settings /> Automação</a>
 			</li>
 		</ul>
 
-		<img
-			src="/img/logo-slogan.webp"
-			,
-			alt="Logomarca Ousaria"
-			class="w-44 object-contain 2xl:w-50"
-		/>
+		<img src="/img/logo-slogan.webp" alt="Logomarca Ousaria" class="w-44 object-contain 2xl:w-50" />
 	</nav>
 
 	<div class="h-full w-full rounded-2xl bg-mist-100 p-6">

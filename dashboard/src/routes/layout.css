@@ -3,24 +3,24 @@
 @theme {
 	--color-primary: #5c0017;
 	--gradient-primary: linear-gradient(90deg, #5c0017 0%, #3d000f 100%);
-	--color-secondary: #fcb23c; 
+	--color-secondary: #fcb23c;
 	--color-tertiary: #c51e1b;
 }
 
 body {
- 	font-family: 'Inter Variable', sans-serif;
+	font-family: 'Inter Variable', sans-serif;
 	background: var(--gradient-primary);
-	color: var(--color-white)
+	color: var(--color-white);
 }
 
 .font-head {
- 	font-family: 'Alumni Sans Variable', sans-serif;
+	font-family: 'Alumni Sans Variable', sans-serif;
 }
 
 .font-text {
- 	font-family: 'Inter Variable', sans-serif;
+	font-family: 'Inter Variable', sans-serif;
 }
 
 .font-mono {
-    font-family: 'JetBrains Mono Variable', monospace;
+	font-family: 'JetBrains Mono Variable', monospace;
 }
