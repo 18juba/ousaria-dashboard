@@ -20,7 +20,7 @@
 		scales: {
 			x: {
 				grid: { display: false },
-				ticks: { color: '#8f6b73', font: { family: 'Inter Variable' } }
+				ticks: { color: '#8f6b73', font: { family: 'Inter Variable', size: 10 } }
 			},
 			y: {
 				beginAtZero: true,
@@ -29,13 +29,13 @@
 				ticks: {
 					color: '#8f6b73',
 					callback: (value) => `${value}${unit}`,
-					font: { family: 'JetBrains Mono Variable' }
+					font: { family: 'JetBrains Mono Variable', size: 10 }
 				}
 			}
 		}
 	});
 </script>
 
-<div class="relative h-72 w-full" role="img" aria-label={title}>
+<div class="relative h-44 w-full" role="img" aria-label={title}>
 	<Bar {data} {options} />
 </div>
