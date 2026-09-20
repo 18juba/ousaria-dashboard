@@ -1,13 +1,19 @@
 <script>
+	import { onMount } from 'svelte';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import Navigation from '$lib/components/Navigation.svelte';
+	import { initializeData } from '$lib/data/csvData';
 
 	import '@fontsource-variable/alumni-sans';
 	import '@fontsource-variable/inter';
 	import '@fontsource-variable/jetbrains-mono';
 
 	let { children } = $props();
+
+	onMount(() => {
+		initializeData();
+	});
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
