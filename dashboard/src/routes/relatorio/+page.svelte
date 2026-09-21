@@ -104,7 +104,7 @@
 	let actionPlan = $derived([
 		{
 			priority: '01',
-			title: 'Reativar a conversa orgânica',
+			title: 'Fortalecer interações orgânicas',
 			signal: 'Em setembro, a maior parte das interações já era resposta a lembretes.',
 			experiment:
 				'Reduzir mensagens automáticas, criar uma enquete diária, destacar conquistas dos membros e estabelecer mediação ativa no grupo.',
@@ -112,7 +112,7 @@
 		},
 		{
 			priority: '02',
-			title: 'Revisar o ritual e o acesso',
+			title: 'Revisar o acesso',
 			signal:
 				'A reclamação sobre terça-feira às 19h aparece no mesmo período em que a participação cai de 69% para 62%.',
 			hypothesis:
@@ -123,7 +123,7 @@
 		},
 		{
 			priority: '03',
-			title: 'Voltar ao conteúdo que resolve',
+			title: 'Conteúdo que resolve',
 			signal:
 				'Precificação e fluxo de caixa geraram dúvidas; depois, os encontros passaram a ser percebidos como repetitivos.',
 			hypothesis:
@@ -194,7 +194,7 @@
 				<p class="mt-4 max-w-2xl text-sm leading-6 text-primary/70 md:text-base">
 					A comunidade ainda cresceu em tamanho, mas perdeu força na participação, no engajamento e
 					na geração de valor entre membros. A recomendação é apoiar a renovação com um ciclo de
-					recuperação de 90 dias, metas explícitas e revisão mensal.
+					recuperação, metas explícitas e revisão mensal.
 				</p>
 			</div>
 
@@ -294,10 +294,6 @@
 					<h2 class="text-xl font-bold text-primary">Pesquisa de impacto</h2>
 					<span class="text-xs font-semibold text-primary/50">Onda 1 × Onda 2</span>
 				</div>
-				<p class="mt-2 text-sm leading-5 text-primary/60">
-					Os resultados e a autonomia são apresentados em tabela para não misturar escalas no mesmo
-					eixo visual.
-				</p>
 				<div class="mt-5 overflow-x-auto rounded-lg border border-primary/10">
 					<table class="w-full min-w-[430px] border-collapse text-left text-xs">
 						<thead class="bg-primary/5 text-primary/60">
