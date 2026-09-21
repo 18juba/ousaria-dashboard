@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/favicon.png';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import { initializeData } from '$lib/data/csvData';
 
