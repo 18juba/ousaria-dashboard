@@ -109,7 +109,8 @@
 						Importar e exportar dados
 					</h1>
 					<p class="mt-3 text-sm leading-6 text-primary/65 md:text-base">
-						Integração com planilhas, bancos de dados ou APIs usando CSV.
+						Uma versão oficial poderia coletar dados de Google Sheets, APIs ou ferramentas de BI
+						em rotina agendada usando n8n, Make, Zapier ou Python.
 					</p>
 				</div>
 				{#if data.source === 'imported'}

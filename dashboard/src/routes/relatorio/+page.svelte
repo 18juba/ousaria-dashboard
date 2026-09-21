@@ -41,7 +41,14 @@
 		return row?.[wave] ?? '—';
 	};
 
-	const themeAnalysis = [
+	const formatImpactValue = (row, value) => {
+		if (value === null || value === undefined) return '—';
+		if (row.unit === '%') return `${value}%`;
+		if (row.unit === 'pts') return `${value} pts`;
+		return `${String(value).replace('.', ',')}/10`;
+	};
+
+	const themeReadings = [
 		{
 			reading:
 				'O grupo ainda precisava de orientação básica para ser usado como espaço de comunidade.'
@@ -56,64 +63,94 @@
 		},
 		{
 			reading:
-				'O horário fixo cria uma barreira de participação e pode explicar parte da queda de presença.'
+				'O horário fixo aparece como uma possível barreira de acesso; a relação com a presença precisa ser testada.'
 		},
 		{
 			reading:
-				'A percepção de repetição indica que o formato perdeu novidade antes de a base atingir a meta de 300 membros.'
+				'A percepção de repetição pode indicar perda de novidade antes de a base atingir a meta de 300 membros.'
 		},
 		{
 			reading:
-				'Responder apenas a lembretes automáticos é um sinal de comunidade passiva, não de conversa espontânea.'
+				'A predominância de respostas a lembretes sugere menor espontaneidade, mas não prova sozinha falta de interesse.'
 		}
-	]
-		.map((reading, index) => ({ ...data.whatsappThemes[index], ...reading }))
-		.filter((item) => item.month);
+	];
+
+	const formatThemeContext = (metric) =>
+		[
+			metric?.participationRate !== null && metric?.participationRate !== undefined
+				? `${metric.participationRate}% de participação`
+				: null,
+			metric?.engagementRate !== null && metric?.engagementRate !== undefined
+				? `${metric.engagementRate}% de engajamento`
+				: null,
+			metric?.eventNps !== null && metric?.eventNps !== undefined ? `NPS ${metric.eventNps}` : null,
+			metric?.newMembers !== null && metric?.newMembers !== undefined
+				? `${metric.newMembers} novos membros`
+				: null
+		]
+			.filter(Boolean)
+			.join(' · ');
+
+	let themeAnalysis = $derived.by(() =>
+		data.whatsappThemes
+			.map((theme, index) => ({
+				...theme,
+				...(themeReadings[index] ?? {}),
+				context: formatThemeContext(monthlyMetrics[index])
+			}))
+			.filter((item) => item.month)
+	);
 
 	let actionPlan = $derived([
 		{
 			priority: '01',
 			title: 'Reativar a conversa orgânica',
-			evidence: 'Em setembro, a maior parte das interações já era resposta a lembretes.',
-			action:
-				'Reduzir mensagens automáticas, criar uma enquetes diárias, destacar conquistas dos membros e estabelecer mediação ativa no grupo.',
+			signal: 'Em setembro, a maior parte das interações já era resposta a lembretes.',
+			experiment:
+				'Reduzir mensagens automáticas, criar uma enquete diária, destacar conquistas dos membros e estabelecer mediação ativa no grupo.',
 			measure: 'Mensagens espontâneas por semana e participação mensal.'
 		},
 		{
 			priority: '02',
 			title: 'Revisar o ritual e o acesso',
-			evidence:
-				'A reclamação sobre terça-feira às 19h aparece antes da queda mais forte de participação.',
-			action:
+			signal:
+				'A reclamação sobre terça-feira às 19h aparece no mesmo período em que a participação cai de 69% para 62%.',
+			hypothesis:
+				'Uma hipótese é que o horário fixo reduz o acesso de parte dos membros; os dados não comprovam causalidade.',
+			experiment:
 				'Aplicar uma enquete de horários, testar um segundo turno ou encontro alternativo e disponibilizar resumo acionável para quem não puder participar.',
 			measure: 'Participação, resposta à pesquisa e presença por horário.'
 		},
 		{
 			priority: '03',
 			title: 'Voltar ao conteúdo que resolve',
-			evidence:
+			signal:
 				'Precificação e fluxo de caixa geraram dúvidas; depois, os encontros passaram a ser percebidos como repetitivos.',
-			action:
-				'Incluir precificação e fluxo de caixa como temas recorrentes dos encontros semanais, com aulas sobre os fundamentos, exemplos práticos e espaço para debate e dúvidas; variar a abordagem ao longo do mês para evitar a sensação de repetição.',
+			hypothesis:
+				'Uma hipótese é que a perda de relevância percebida contribui para a queda de engajamento e NPS.',
+			experiment:
+				'Incluir precificação e fluxo de caixa nos encontros mensais, com aulas sobre fundamentos, exemplos práticos e espaço para debate; variar a abordagem ao longo do mês.',
 			measure: 'Engajamento, NPS do encontro e avaliação de utilidade.'
 		},
 		{
 			priority: '04',
 			title: 'Fazer o networking acontecer',
-			evidence:
+			signal:
 				'A conexão de negócios caiu de ' +
 				impactValue('connections', 'waveOne') +
 				'% na Onda 1 para ' +
 				impactValue('connections', 'waveTwo') +
 				'% na Onda 2.',
-			action:
+			hypothesis:
+				'Uma hipótese é que a comunidade não está convertendo sua base em interações de negócio com clareza suficiente.',
+			experiment:
 				'Organizar uma rodada de pedidos e ofertas, curar apresentações entre membros e acompanhar se as indicações viraram conversas ou parcerias.',
 			measure: 'Introduções realizadas e conexões de negócio geradas.'
 		},
 		{
 			priority: '05',
 			title: 'Retomar crescimento por indicação',
-			evidence:
+			signal:
 				'A entrada mensal caiu de ' +
 				firstComparableMonth.newMembers +
 				' novos membros em ' +
@@ -123,9 +160,9 @@
 				' em ' +
 				currentMonth.month +
 				'.',
-			action:
+			experiment:
 				'Ativar membros satisfeitos como embaixadores, usar histórias de resultado e convidar perfis que complementem as necessidades atuais da rede.',
-			measure: 'Novos membros por mês e crescimento mensal acima de 6%.'
+			measure: 'Melhora do crescimento mensal.'
 		}
 	]);
 </script>
@@ -165,18 +202,20 @@
 				<div class="rounded-xl bg-primary p-5 text-white">
 					<div class="flex items-center gap-2 text-secondary">
 						<CircleAlert size={18} />
-						<p class="text-xs font-bold tracking-[0.12em] uppercase">Hipótese Central</p>
+						<p class="text-xs font-bold tracking-[0.12em] uppercase">Leitura de trabalho</p>
 					</div>
 					<p class="mt-3 text-lg font-bold">
-						Desgaste da experiência: encontros previsíveis, horário pouco acessível e WhatsApp usado
-						mais como mural de avisos do que como comunidade.
+						Os sinais apontam para três frentes a testar: acesso aos encontros, relevância dos
+						conteúdos e geração de conexões de negócio.
 					</p>
 				</div>
 				<div class="rounded-xl border border-secondary/30 bg-secondary/10 p-5 text-primary">
-					<p class="text-xs font-bold tracking-[0.12em] text-primary/55 uppercase">Problema</p>
+					<p class="text-xs font-bold tracking-[0.12em] text-primary/55 uppercase">
+						Fato observado
+					</p>
 					<p class="mt-3 text-lg font-bold">
-						O problema atual é menos falta de interesse e mais perda de hábito, relevância e
-						conexão.
+						A base cresceu, mas os indicadores de participação, engajamento, NPS, resposta e
+						retenção pioraram enquanto o churn aumentou.
 					</p>
 				</div>
 			</div>
@@ -192,8 +231,10 @@
 					<p>
 						A base passou de <strong class="text-primary">{firstMonth.activeMembers}</strong> para
 						<strong class="text-primary">{currentMonth.activeMembers} membros</strong>, um avanço de
-						<strong class="text-primary">{totalMemberGrowthRate}%</strong>. Isso sustenta a decisão
-						de renovar: existe demanda e a comunidade ainda tem escala para gerar valor.
+						<strong class="text-primary">{totalMemberGrowthRate}%</strong>. O crescimento da base
+						demonstra tração, mas não é suficiente, isoladamente, para avaliar o sucesso da
+						comunidade. Minha recomendação seria discutir a renovação acompanhada de um plano de
+						recuperação e metas claras de saúde da comunidade.
 					</p>
 					<p>
 						O alerta está na velocidade e na qualidade desse crescimento. A entrada mensal caiu
@@ -206,7 +247,11 @@
 						<strong class="text-rose-700">{Math.abs(participationDelta)} p.p.</strong>
 						e
 						<strong class="text-rose-700">{Math.abs(engagementDelta)} p.p.</strong>,
-						respectivamente.
+						respectivamente. O NPS do encontro caiu de
+						<strong class="text-rose-700">{firstMonth.eventNps}</strong> para
+						<strong class="text-rose-700">{currentMonth.eventNps}</strong> e a resposta mensal de
+						<strong class="text-rose-700">{firstMonth.surveyResponseRate}%</strong> para
+						<strong class="text-rose-700">{currentMonth.surveyResponseRate}%</strong>.
 					</p>
 					<p>
 						A retenção caiu para {currentMonth.retentionRate}% e o churn subiu para {currentMonth.churnRate}%.
@@ -219,10 +264,11 @@
 			<article class="rounded-xl border border-primary/10 bg-white p-6 shadow-sm xl:col-span-3">
 				<div class="flex items-center gap-2">
 					<MessageCircle class="text-green-500" size={19} />
-					<h2 class="text-xl font-bold text-primary">O que mostra o Whatsapp</h2>
+					<h2 class="text-xl font-bold text-primary">O que mostra o WhatsApp</h2>
 				</div>
 				<p class="mt-2 text-sm leading-5 text-primary/60">
-					Os temas recorrentes ajudam a explicar a mudança de comportamento ao longo do período.
+					Os temas recorrentes foram cruzados com os indicadores mensais; eles sugerem caminhos de
+					investigação, mas não provam causalidade.
 				</p>
 
 				<div class="mt-5 max-h-60 space-y-4 overflow-y-auto pr-1">
@@ -231,9 +277,81 @@
 							<span class="font-mono text-[11px] font-bold text-primary">{item.month}</span>
 							<p class="mt-2 text-xs leading-5 font-semibold text-primary/80">{item.theme}</p>
 							<p class="mt-1 text-xs leading-5 text-primary/55">{item.reading}</p>
+							{#if item.context}
+								<p class="mt-1 text-[11px] leading-5 font-medium text-primary/45">
+									Números do mês: {item.context}
+								</p>
+							{/if}
 						</div>
 					{/each}
 				</div>
+			</article>
+		</section>
+
+		<section class="grid gap-4 xl:grid-cols-5">
+			<article class="rounded-xl border border-primary/10 bg-white p-6 shadow-sm xl:col-span-3">
+				<div class="flex items-center justify-between gap-4">
+					<h2 class="text-xl font-bold text-primary">Pesquisa de impacto</h2>
+					<span class="text-xs font-semibold text-primary/50">Onda 1 × Onda 2</span>
+				</div>
+				<p class="mt-2 text-sm leading-5 text-primary/60">
+					Os resultados e a autonomia são apresentados em tabela para não misturar escalas no mesmo
+					eixo visual.
+				</p>
+				<div class="mt-5 overflow-x-auto rounded-lg border border-primary/10">
+					<table class="w-full min-w-[430px] border-collapse text-left text-xs">
+						<thead class="bg-primary/5 text-primary/60">
+							<tr>
+								<th class="px-3 py-2 font-semibold">Indicador</th>
+								<th class="px-3 py-2 text-right font-semibold">Onda 1</th>
+								<th class="px-3 py-2 text-right font-semibold">Onda 2</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each impactRows as row (row.key)}
+								<tr
+									class={`border-t border-primary/10 ${row.category === 'evidence' ? 'bg-secondary/5' : ''}`}
+								>
+									<td class="px-3 py-2 font-medium text-primary/75">
+										{row.label.join(' ')}
+										{#if row.category === 'evidence'}
+											<span class="ml-1 text-[10px] text-primary/50">(evidência)</span>
+										{/if}
+									</td>
+									<td class="px-3 py-2 text-right font-mono text-primary">
+										{formatImpactValue(row, row.waveOne)}
+									</td>
+									<td class="px-3 py-2 text-right font-mono text-primary">
+										{formatImpactValue(row, row.waveTwo)}
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			</article>
+
+			<article class="rounded-xl border border-primary/10 bg-white p-6 shadow-sm xl:col-span-2">
+				<h2 class="text-xl font-bold text-primary">Qualidade e limitações dos dados</h2>
+				<p class="mt-3 text-sm leading-6 text-primary/70">
+					A taxa de resposta da pesquisa de impacto caiu de
+					<strong class="text-primary">{impactValue('response', 'waveOne')}%</strong> para
+					<strong class="text-primary">{impactValue('response', 'waveTwo')}%</strong>.
+				</p>
+				<ul class="mt-4 space-y-3 text-sm leading-6 text-primary/70">
+					<li>
+						As duas ondas podem não ter exatamente os mesmos respondentes; a comparação deve ser
+						interpretada com cautela.
+					</li>
+					<li>
+						Os dados de membros, novos membros, retenção e churn não necessariamente fecham em uma
+						identidade simples de estoque; é necessário validar definição e denominador.
+					</li>
+					<li>
+						Os temas do WhatsApp são sinais qualitativos agregados, não uma amostra completa de
+						todas as conversas.
+					</li>
+				</ul>
 			</article>
 		</section>
 
@@ -258,14 +376,23 @@
 							</div>
 						</div>
 						<p class="mt-4 text-xs leading-5 font-semibold text-rose-700">
-							Evidência: {item.evidence}
+							Sinal observado: {item.signal}
 						</p>
-						<p class="mt-3 mb-4 text-sm leading-6 text-primary/70">{item.action}</p>
+						{#if item.hypothesis}
+							<p class="mt-3 text-xs leading-5 text-primary/65">
+								<strong class="text-primary">Hipótese:</strong>
+								{item.hypothesis}
+							</p>
+						{/if}
+						<p class="mt-3 mb-4 text-sm leading-6 text-primary/70">
+							<strong class="text-primary">Experimento/ação:</strong>
+							{item.experiment}
+						</p>
 
 						<div
 							class="mt-auto flex items-start gap-2 border-t border-primary/10 pt-3 text-xs leading-5 text-primary/60"
 						>
-							<strong class="text-primary">Medir:</strong>
+							<strong class="text-primary">Métrica de sucesso:</strong>
 							{item.measure}
 						</div>
 					</article>

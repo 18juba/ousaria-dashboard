@@ -10,7 +10,17 @@
 		return `${signal}${Math.abs(kpi.delta)} ${kpi.deltaUnit} vs. mês anterior`;
 	};
 
+	const formatImpactValue = (row, value) => {
+		if (value === null || value === undefined) return '—';
+		if (row.unit === '%') return `${value}%`;
+		if (row.unit === 'pts') return `${value} pts`;
+		return `${String(value).replace('.', ',')}/10`;
+	};
+
 	let data = $derived($appData);
+	let monthlyMetrics = $derived(data.monthlyMetrics);
+	let firstMonth = $derived(monthlyMetrics[0] ?? {});
+	let currentMonth = $derived(monthlyMetrics[monthlyMetrics.length - 1] ?? {});
 </script>
 
 <svelte:head>
@@ -29,7 +39,7 @@
 			<p class="mt-1">{data.error}</p>
 		</div>
 	{:else}
-		<section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+		<section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
 			{#each data.dashboardKpis as kpi (kpi.label)}
 				<article class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm">
 					<p class="text-sm font-semibold text-primary/65">{kpi.label}</p>
@@ -49,6 +59,12 @@
 							</span>
 							<span>{formatDelta(kpi)}</span>
 						</div>
+					{:else if kpi.goal}
+						<div class="mt-1 flex items-center justify-between text-xs text-primary/60">
+							<span>Meta: {kpi.goal.target}</span>
+							<strong class="font-mono text-primary">{kpi.goal.achieved}% atingida</strong>
+						</div>
+						<p class="mt-1 text-xs text-primary/55">Faltam {kpi.goal.remaining} membros</p>
 					{:else}
 						<p class="mt-1 text-xs text-primary/55">{kpi.caption}</p>
 					{/if}
@@ -56,13 +72,34 @@
 			{/each}
 		</section>
 
-		<section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			<article class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm">
+		<section
+			class="rounded-xl border border-secondary/30 bg-secondary/10 p-4 text-sm text-primary"
+		>
+			<p class="mt-1">
+				A base cresceu de {firstMonth.activeMembers} para
+				<strong>{currentMonth.activeMembers} membros</strong>, mas a aquisição desacelerou para
+				<strong>{currentMonth.newMembers} novos membros</strong> e {currentMonth.growthRate}% de
+				crescimento mensal. Participação, engajamento, NPS e resposta à pesquisa estão em queda;
+				retenção recuou para {currentMonth.retentionRate}% e churn subiu para
+				{currentMonth.churnRate}%.
+			</p>
+		</section>
+
+		<section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			<article class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm lg:col-span-2">
 				<div class="mb-2">
-					<h2 class="text-base font-bold text-primary">Crescimento da base</h2>
-					<p class="text-xs text-primary/60">Membros ativos e novos membros</p>
+					<h2 class="text-base font-bold text-primary">Base e meta de membros</h2>
+					<p class="text-xs text-primary/60">Membros ativos, novos membros e referência de 300</p>
 				</div>
 				<LineChart data={data.growthData} title="Crescimento mensal da base" unit="" />
+			</article>
+
+			<article class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm">
+				<div class="mb-2">
+					<h2 class="text-base font-bold text-primary">Crescimento mensal</h2>
+					<p class="text-xs text-primary/60">Variação percentual da base</p>
+				</div>
+				<LineChart data={data.growthRateData} title="Evolução do crescimento mensal" unit="%" />
 			</article>
 
 			<article class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm">
@@ -77,7 +114,15 @@
 				/>
 			</article>
 
-			<article class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm">
+			<article class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm lg:col-span-2">
+				<div class="mb-2">
+					<h2 class="text-base font-bold text-primary">NPS e resposta à pesquisa</h2>
+					<p class="text-xs text-primary/60">NPS em pontos e resposta em percentual</p>
+				</div>
+				<LineChart data={data.experienceData} title="Evolução do NPS e da resposta" unit="" />
+			</article>
+
+			<article class="rounded-xl border border-primary/10 bg-white p-4 shadow-sm lg:col-span-2">
 				<div class="mb-2">
 					<h2 class="text-base font-bold text-primary">Retenção e churn</h2>
 					<p class="text-xs text-primary/60">Abril sem dado disponível</p>
@@ -92,9 +137,41 @@
 			>
 				<div class="mb-2">
 					<h2 class="text-lg font-bold text-primary">Indicadores de impacto</h2>
-					<p class="text-xs text-primary/60">Comparação entre ondas</p>
+					<p class="text-xs text-primary/60">Resultados em percentual; demais escalas na tabela</p>
 				</div>
 				<BarChart data={data.impactData} title="Indicadores de impacto" unit="%" />
+
+				<div class="mt-4 overflow-x-auto rounded-lg border border-primary/10">
+					<table class="w-full min-w-[390px] border-collapse text-left text-xs">
+						<thead class="bg-primary/5 text-primary/60">
+							<tr>
+								<th class="px-3 py-2 font-semibold">Indicador</th>
+								<th class="px-3 py-2 text-right font-semibold">Onda 1</th>
+								<th class="px-3 py-2 text-right font-semibold">Onda 2</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each data.impactRows as row (row.key)}
+								<tr
+									class={`border-t border-primary/10 ${row.category === 'evidence' ? 'bg-secondary/5' : ''}`}
+								>
+									<td class="px-3 py-2 font-medium text-primary/75">
+										{row.label.join(' ')}
+										{#if row.category === 'evidence'}
+											<span class="ml-1 text-[10px] text-primary/50">(evidência)</span>
+										{/if}
+									</td>
+									<td class="px-3 py-2 text-right font-mono text-primary">
+										{formatImpactValue(row, row.waveOne)}
+									</td>
+									<td class="px-3 py-2 text-right font-mono text-primary">
+										{formatImpactValue(row, row.waveTwo)}
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
 			</article>
 
 			<article

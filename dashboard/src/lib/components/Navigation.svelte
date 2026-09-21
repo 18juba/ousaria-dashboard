@@ -117,5 +117,9 @@
 		</li>
 	</ul>
 
-	<img src="/img/logo-slogan.webp" alt="Logomarca Ousaria" class="w-44 object-contain 2xl:w-50 self-center" />
+	<img
+		src="/img/logo-slogan.webp"
+		alt="Logomarca Ousaria"
+		class="w-44 self-center object-contain 2xl:w-50"
+	/>
 </nav>

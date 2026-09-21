@@ -20,6 +20,7 @@ export const DEFAULT_FILES = {
 };
 
 const STORAGE_KEY = 'ousaria-dashboard-csv-v1';
+const MEMBER_TARGET = 300;
 
 const emptyState = {
 	status: 'loading',
@@ -36,8 +37,11 @@ const emptyState = {
 	dashboardKpis: [],
 	healthTrendData: { labels: [], datasets: [] },
 	growthData: { labels: [], datasets: [] },
+	growthRateData: { labels: [], datasets: [] },
+	experienceData: { labels: [], datasets: [] },
 	retentionData: { labels: [], datasets: [] },
 	impactData: { labels: [], datasets: [] },
+	memberGoal: { current: null, target: MEMBER_TARGET, achieved: null, remaining: null },
 	impactRows: [],
 	whatsappThemes: []
 };
@@ -173,6 +177,8 @@ const impactLabel = (key) => {
 		learning: ['Aprendizado', 'aplicado'],
 		revenue: ['Aumento de', 'faturamento'],
 		connections: ['Conexão de', 'negócio'],
+		nps: ['NPS geral', 'da comunidade'],
+		autonomy: ['Autonomia', 'empreendedora'],
 		response: ['Resposta à', 'pesquisa']
 	};
 
@@ -196,6 +202,7 @@ function parseImpactCsv(text) {
 			key,
 			indicator,
 			label: impactLabel(key),
+			category: key === 'response' ? 'evidence' : 'outcome',
 			waveOne: parseNumber(waveOneRaw),
 			waveTwo: parseNumber(waveTwoRaw),
 			isPercentage: isPercentageValue(waveOneRaw) || isPercentageValue(waveTwoRaw),
@@ -211,7 +218,14 @@ function parseImpactCsv(text) {
 	});
 }
 
-const createLineDataset = (label, data, borderColor, backgroundColor, spanGaps = false) => ({
+const createLineDataset = (
+	label,
+	data,
+	borderColor,
+	backgroundColor,
+	spanGaps = false,
+	extras = {}
+) => ({
 	label,
 	data,
 	borderColor,
@@ -223,7 +237,8 @@ const createLineDataset = (label, data, borderColor, backgroundColor, spanGaps =
 	pointHoverRadius: 5,
 	borderWidth: 2.5,
 	tension: 0.35,
-	spanGaps
+	spanGaps,
+	...extras
 });
 
 const createChartData = (monthlyMetrics) => {
@@ -262,6 +277,47 @@ const createChartData = (monthlyMetrics) => {
 					monthlyMetrics.map((metric) => metric.newMembers),
 					colors.secondary,
 					'rgba(252, 178, 60, 0.12)'
+				),
+				createLineDataset(
+					'Meta de membros (300)',
+					monthlyMetrics.map(() => MEMBER_TARGET),
+					colors.muted,
+					'transparent',
+					false,
+					{
+						borderDash: [6, 5],
+						borderWidth: 1.5,
+						pointRadius: 0,
+						pointHoverRadius: 0
+					}
+				)
+			]
+		},
+		growthRateData: {
+			labels,
+			datasets: [
+				createLineDataset(
+					'Crescimento mensal',
+					monthlyMetrics.map((metric) => metric.growthRate),
+					colors.tertiary,
+					'rgba(197, 30, 27, 0.08)'
+				)
+			]
+		},
+		experienceData: {
+			labels,
+			datasets: [
+				createLineDataset(
+					'NPS do encontro (pts)',
+					monthlyMetrics.map((metric) => metric.eventNps),
+					colors.primary,
+					'rgba(92, 0, 23, 0.08)'
+				),
+				createLineDataset(
+					'Resposta à pesquisa (%)',
+					monthlyMetrics.map((metric) => metric.surveyResponseRate),
+					colors.secondary,
+					'rgba(252, 178, 60, 0.12)'
 				)
 			]
 		},
@@ -287,7 +343,8 @@ const createChartData = (monthlyMetrics) => {
 
 const createImpactChartData = (impactRows) => {
 	const rows = impactRows.filter(
-		(row) => row.isPercentage && row.waveOne !== null && row.waveTwo !== null
+		(row) =>
+			row.category === 'outcome' && row.isPercentage && row.waveOne !== null && row.waveTwo !== null
 	);
 
 	return {
@@ -328,34 +385,54 @@ const buildModel = (principalText, impactText, metadata = {}) => {
 	const previousMonth = monthlyMetrics[monthlyMetrics.length - 2];
 	const charts = createChartData(monthlyMetrics);
 	const impactData = createImpactChartData(impactRows);
+	const currentMembers = currentMonth.activeMembers ?? null;
+	const monthlyDelta = (field) => {
+		const current = currentMonth[field];
+		const previous = previousMonth?.[field];
+		return current === null || current === undefined || previous === null || previous === undefined
+			? undefined
+			: current - previous;
+	};
+	const memberGoal = {
+		current: currentMembers,
+		target: MEMBER_TARGET,
+		achieved: currentMembers === null ? null : Math.round((currentMembers / MEMBER_TARGET) * 100),
+		remaining: currentMembers === null ? null : Math.max(MEMBER_TARGET - currentMembers, 0)
+	};
 	const dashboardKpis = [
 		{
 			label: 'Membros ativos',
 			value: String(currentMonth.activeMembers ?? '—'),
-			caption: 'meta: 300'
+			caption: 'meta: 300',
+			goal: memberGoal
 		},
 		{
 			label: 'Participação',
 			value: currentMonth.participationRate === null ? '—' : currentMonth.participationRate + '%',
 			caption: 'vs. mês anterior',
-			delta: previousMonth
-				? currentMonth.participationRate - previousMonth.participationRate
-				: undefined,
+			delta: monthlyDelta('participationRate'),
 			deltaUnit: 'p.p.'
 		},
 		{
 			label: 'Engajamento',
 			value: currentMonth.engagementRate === null ? '—' : currentMonth.engagementRate + '%',
 			caption: 'vs. mês anterior',
-			delta: previousMonth ? currentMonth.engagementRate - previousMonth.engagementRate : undefined,
+			delta: monthlyDelta('engagementRate'),
 			deltaUnit: 'p.p.'
 		},
 		{
 			label: 'NPS do encontro',
 			value: currentMonth.eventNps === null ? '—' : String(currentMonth.eventNps),
 			caption: 'vs. mês anterior',
-			delta: previousMonth ? currentMonth.eventNps - previousMonth.eventNps : undefined,
+			delta: monthlyDelta('eventNps'),
 			deltaUnit: 'pts'
+		},
+		{
+			label: 'Resposta à pesquisa',
+			value: currentMonth.surveyResponseRate === null ? '—' : currentMonth.surveyResponseRate + '%',
+			caption: 'vs. mês anterior',
+			delta: monthlyDelta('surveyResponseRate'),
+			deltaUnit: 'p.p.'
 		}
 	];
 
@@ -366,8 +443,11 @@ const buildModel = (principalText, impactText, metadata = {}) => {
 		loadedAt: metadata.loadedAt ?? new Date().toISOString(),
 		monthlyMetrics,
 		dashboardKpis,
+		memberGoal,
 		healthTrendData: charts.healthTrendData,
 		growthData: charts.growthData,
+		growthRateData: charts.growthRateData,
+		experienceData: charts.experienceData,
 		retentionData: charts.retentionData,
 		impactData,
 		impactRows,
